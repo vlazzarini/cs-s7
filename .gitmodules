@@ -1,0 +1,3 @@
+[submodule "s7"]
+	path = s7
+	url = https://cm-gitlab.stanford.edu/bil/s7.git
