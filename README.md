@@ -14,3 +14,62 @@ A simple performance run example:
 
 In this example, Csound runs on a separate thread, making the above
 ideal for REPL use.
+
+## Building
+
+CMake is used for building the cs-s7 interpreter. With Csound installed,
+the commands
+
+```
+mkdir build
+cd build
+cmake ..
+make
+```
+
+are used to build the `cs-s7` program.
+
+## Running
+
+To run the interpreter from the build directory,
+
+```
+./cs-s7
+cs-s7: Csound S7 scheme interpreter
+cs-s7>
+```
+
+## Functions
+
+```
+(make-csound)
+```
+
+creates a new Csound engine object.
+
+
+```
+(compile-csound csound-obj string)
+```
+
+compiles Csound code from file `string`.
+
+```
+(start-csound csound-obj)
+```
+
+starts the Csound engine and performance.
+
+```
+(stop-csound csound-obj)
+```
+
+stops a Csound performance.
+
+```
+(pause-csound csound-obj)
+```
+
+toggles-pause a Csound performance.
+
+... more on the way!

@@ -6,7 +6,7 @@
 int main(int argc, char **argv) {
   s7_scheme *s7 = s7_init();
   csound_interface(s7);
-
+  fprintf(stdout, "cs-s7: Csound S7 scheme interpreter");
   while (1) {
     char buffer[512];
     fprintf(stdout, "\ncs-s7>");
