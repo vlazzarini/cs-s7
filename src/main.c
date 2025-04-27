@@ -45,6 +45,7 @@ int main(int argc, char **argv) {
       s7_eval_c_string(s7, response); 
     }
   }
-  free(s7);
+  s7_quit(s7);
+  s7_free(s7);
   return 0;
 }
