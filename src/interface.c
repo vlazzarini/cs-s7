@@ -52,13 +52,15 @@ static s7_pointer create(s7_scheme *sc, s7_pointer args) {
 static s7_pointer compile(s7_scheme *sc, s7_pointer args) {
   if(cs_check(s7_car(args))) {
     cs_obj *cs = (cs_obj *) s7_c_object_value(s7_car(args));
-    if(cs->csound == NULL || cs->perf != NULL)
-      return NULL;
+    if(cs->csound == NULL) return NULL;
     if(!s7_is_string(s7_cadr(args)))
       return s7_wrong_type_arg_error(sc,"compile-csound",1,s7_car(args),
                                      "string");
-    const char *argv[] = {"csound", s7_string(s7_cadr(args))};    
-    return s7_make_integer(sc, csoundCompile(cs->csound,2,argv));
+    const char *argv[] = {"csound", s7_string(s7_cadr(args))};
+    if(cs->perf == NULL)
+     return s7_make_integer(sc, csoundCompile(cs->csound,2,argv));
+    else
+     return s7_make_integer(sc, 0);
   } else return s7_wrong_type_arg_error(sc,"compile-csound",0,s7_car(args),
                                         "csound object");
 }
@@ -157,6 +159,8 @@ static s7_pointer stop(s7_scheme *sc, s7_pointer args) {
     if(cs->perf == NULL) return NULL;
     csoundPerformanceThreadStop(cs->perf);
     csoundPerformanceThreadJoin(cs->perf);
+    csoundDestroyPerformanceThread(cs->perf);
+    cs->perf = NULL;
     csoundReset(cs->csound);
     res = csoundSetOption(cs->csound, "-odac");
     return s7_make_integer(sc, res);
