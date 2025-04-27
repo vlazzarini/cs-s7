@@ -31,7 +31,8 @@ static int cs_type_tag = 0;
 typedef struct {
   CSOUND *csound;
   CS_PERF_THREAD *perf;  
-  bool pause;   // perf pause flag
+  bool pause; // perf pause flag
+  bool reset; // reset flag
 } cs_obj;
 
 static inline bool cs_check(s7_pointer obj){
@@ -46,6 +47,7 @@ static s7_pointer create(s7_scheme *sc, s7_pointer args) {
   csoundSetOption(cs->csound, "-odac");
   cs->perf = NULL;
   cs->pause = false;
+  cs->reset = false;
   return s7_make_c_object(sc, cs_type_tag, (void *) cs);
 }
 
@@ -53,14 +55,12 @@ static s7_pointer compile(s7_scheme *sc, s7_pointer args) {
   if(cs_check(s7_car(args))) {
     cs_obj *cs = (cs_obj *) s7_c_object_value(s7_car(args));
     if(cs->csound == NULL) return NULL;
+    if(cs->perf) return s7_make_integer(sc, -1);
     if(!s7_is_string(s7_cadr(args)))
       return s7_wrong_type_arg_error(sc,"compile-csound",1,s7_car(args),
                                      "string");
     const char *argv[] = {"csound", s7_string(s7_cadr(args))};
-    if(cs->perf == NULL)
-     return s7_make_integer(sc, csoundCompile(cs->csound,2,argv));
-    else
-     return s7_make_integer(sc, 0);
+    return s7_make_integer(sc, csoundCompile(cs->csound,2,argv));
   } else return s7_wrong_type_arg_error(sc,"compile-csound",0,s7_car(args),
                                         "csound object");
 }
@@ -68,8 +68,8 @@ static s7_pointer compile(s7_scheme *sc, s7_pointer args) {
 static s7_pointer options(s7_scheme *sc, s7_pointer args) {
   if(cs_check(s7_car(args))) {
     cs_obj *cs = (cs_obj *) s7_c_object_value(s7_car(args));
-    if(cs->csound == NULL ||
-       cs->perf != NULL) return NULL;
+    if(cs->csound == NULL) return NULL;
+    if(cs->perf) return s7_make_integer(sc, -1);
     if(!s7_is_string(s7_cadr(args)))
       return s7_wrong_type_arg_error(sc,"csound-options",1,s7_car(args),
                                      "string"); 
@@ -89,6 +89,25 @@ static s7_pointer event_string(s7_scheme *sc, s7_pointer args) {
     csoundEventString(cs->csound,s7_string(s7_cadr(args)), 1);
     return s7_make_boolean(sc, true);
   } else return s7_wrong_type_arg_error(sc,"csound-event-string",0,s7_car(args),
+                                        "csound object");
+}
+
+static s7_pointer event(s7_scheme *sc, s7_pointer args) {
+  if(cs_check(s7_car(args))) {
+    cs_obj *cs = (cs_obj *) s7_c_object_value(s7_car(args));
+    s7_pointer s7p;
+    int32_t type = s7_integer(s7_cadr(args));
+    MYFLT p[16] = {0};
+    int32_t n = 0;
+    args = s7_cdr(s7_cdr(args));
+    while((s7p = s7_car(args))) {
+      p[n++] = s7_real(s7p);
+      args = s7_cdr(args);
+    }
+    if(cs->csound == NULL) return NULL;
+    csoundEvent(cs->csound, type, p, n-1, 1);
+    return s7_make_boolean(sc, true);
+  } else return s7_wrong_type_arg_error(sc,"csound-event",0,s7_car(args),
                                         "csound object");
 }
 
@@ -114,8 +133,8 @@ static s7_pointer get_channel(s7_scheme *sc, s7_pointer args) {
       return s7_wrong_type_arg_error(sc,"csound-get-channel",1,s7_car(args),
                                      "string");
     return s7_make_real(sc,csoundGetControlChannel(cs->csound,
-                                                    s7_string(s7_cadr(args)),
-                                                    NULL));
+                                                   s7_string(s7_cadr(args)),
+                                                   NULL));
   } else return s7_wrong_type_arg_error(sc,"csound-get-channel",0,s7_car(args),
                                         "csound object");
 }
@@ -140,12 +159,18 @@ static s7_pointer set_channel(s7_scheme *sc, s7_pointer args) {
 static s7_pointer start(s7_scheme *sc, s7_pointer args) {
   if(cs_check(s7_car(args))) {
     cs_obj *cs  = (cs_obj *) s7_c_object_value(s7_car(args));
-    int32_t res = CSOUND_SUCCESS;
+    int32_t res;
     if(cs->csound == NULL) return NULL;
+    if(cs->perf) return s7_make_integer(sc, -1);
+    if(cs->reset) {
+      csoundReset(cs->csound);
+      csoundSetOption(cs->csound, "-odac");
+      cs->reset = false;
+    }
     res = csoundStart(cs->csound);
     if(res == CSOUND_SUCCESS){
       cs->perf = csoundCreatePerformanceThread(cs->csound);
-      csoundPerformanceThreadPlay(cs->perf);
+      if(cs->perf) csoundPerformanceThreadPlay(cs->perf);
     }
     return s7_make_integer(sc, res);
   } return s7_wrong_type_arg_error(sc,"start-csound",0,s7_car(args),
@@ -155,15 +180,14 @@ static s7_pointer start(s7_scheme *sc, s7_pointer args) {
 static s7_pointer stop(s7_scheme *sc, s7_pointer args) {
   if(cs_check(s7_car(args))) {
     cs_obj *cs  = (cs_obj *) s7_c_object_value(s7_car(args));
-    int32_t res;
-    if(cs->perf == NULL) return NULL;
-    csoundPerformanceThreadStop(cs->perf);
-    csoundPerformanceThreadJoin(cs->perf);
-    csoundDestroyPerformanceThread(cs->perf);
-    cs->perf = NULL;
-    csoundReset(cs->csound);
-    res = csoundSetOption(cs->csound, "-odac");
-    return s7_make_integer(sc, res);
+    if(cs->perf) {
+      csoundPerformanceThreadStop(cs->perf);
+      csoundPerformanceThreadJoin(cs->perf);
+      csoundDestroyPerformanceThread(cs->perf);
+      cs->perf = NULL;
+    }
+    cs->reset = true;
+    return s7_make_integer(sc, 0);
   } return s7_wrong_type_arg_error(sc,"stop-csound",0,s7_car(args),
                                    "csound object");
 }
@@ -180,10 +204,12 @@ static s7_pointer toggle_pause(s7_scheme *sc, s7_pointer args) {
 }
 
 static s7_pointer free_csobj(s7_scheme *sc, s7_pointer obj){
-  cs_obj *cs = (cs_obj *) s7_c_object_value(s7_car(obj));
-  csoundPerformanceThreadStop(cs->perf);
-  csoundPerformanceThreadJoin(cs->perf);
-  csoundDestroyPerformanceThread(cs->perf);
+  cs_obj *cs = (cs_obj *) s7_c_object_value(obj);
+  if(cs->perf) {
+    csoundPerformanceThreadStop(cs->perf);
+    csoundPerformanceThreadJoin(cs->perf);
+    csoundDestroyPerformanceThread(cs->perf);
+  }
   csoundDestroy(cs->csound);
   free(s7_c_object_value(obj));
   return NULL;
@@ -212,26 +238,29 @@ static s7_pointer csobj_is_equal(s7_scheme *sc, s7_pointer args){
  *   Interface 
  **/
 void csound_interface(s7_scheme *sc) {
+  csoundInitialize(0);
   cs_type_tag = s7_make_c_type(sc, "csound");
   s7_c_type_set_gc_free(sc, cs_type_tag, free_csobj);
   s7_c_type_set_is_equal(sc, cs_type_tag, csobj_is_equal);
   s7_define_function(sc, "make-csound", create, 0, 0, false,
                      "(make-csound) creates a csound object");
   s7_define_function(sc, "compile-csound", compile, 2, 0, false,
-                     "(compile-csound csound_obj str) compiles a CSD file");
+                     "(compile-csound csound_obj filename) compiles a CSD file");
   s7_define_function(sc, "csound-options", options, 2, 0, false,
-                     "(csound-options csound_obj str) sets engine options");
+                     "(csound-options csound_obj opt-string) sets engine options");
   s7_define_function(sc, "csound-event-string", event_string, 2, 0, false,
-                     "(csound-event-string csound_obj str) sends an event");
+                     "(csound-event-string csound_obj evt-string) sends an event string");
+  s7_define_function(sc, "csound-event", event, 5, 251, false,
+                     "(csound-event csound_obj type p1 p2 p3 ...) sends an event");
   s7_define_function(sc, "csound-compile-string", compile_string, 2, 0, false,
-                     "(csound-compile-string csound_obj str) "
+                     "(csound-compile-string csound_obj code-string) "
                      "compiles a code string");
   s7_define_function(sc, "csound-get-channel", get_channel, 2, 0, false,
-                     "(csound-get-channel csound_obj str)"
+                     "(csound-get-channel csound_obj channel)"
                      " gets data from bus channel");
   s7_define_function(sc, "csound-set-channel", set_channel, 3, 0, false,
-                     "(csound-set-channel csound_obj str real)"
-                     " sets data in bus channel");
+                     "(csound-set-channel csound_obj channel val)"
+                     " sets bus channel to val");
   s7_define_function(sc, "start-csound", start, 1, 0, false,
                      "(start-csound csound-obj) starts csound performance");
   s7_define_function(sc, "stop-csound", stop, 1, 0, false,

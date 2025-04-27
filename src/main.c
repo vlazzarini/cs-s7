@@ -30,9 +30,17 @@
 #include <string.h>
 #include "cs-s7.h"
 
+static s7_scheme *s7;
+
+static void bye(void) {
+ s7_free(s7);
+ fprintf(stderr, "cs-s7: finished.\n");
+}
+
 int main(int argc, char **argv) {
-  s7_scheme *s7 = s7_init();
+  s7 = s7_init();
   csound_interface(s7);
+  atexit(bye);
   fprintf(stdout, "cs-s7: Csound S7 scheme interpreter");
   while (1) {
     char buffer[512];

@@ -49,10 +49,10 @@ creates a new Csound engine object.
 
 
 ```
-(compile-csound csound-obj string)
+(compile-csound csound-obj filename)
 ```
 
-compiles Csound code from file `string`.
+compiles Csound code from file.
 
 ```
 (start-csound csound-obj)
@@ -73,27 +73,35 @@ stops a Csound performance.
 toggles-pause a Csound performance.
 
 ```
-(csound-compile-string csound-obj string)
+(csound-compile-string csound-obj code-string)
 ```
 
 compiles Csound code from a string.
 
-```
-(csound-event-string csound-obj string)
-```
-
-sends a event from a string.
-
 
 ```
-(csound-set-channel csound-obj string real)
+(csound-event csound-obj type p1 p2 p3 ...)
+```
+
+sends event of type (0  = instr, 1 = ftable, 2 = end) with pfields p1,
+p2, p3 ...
+
+```
+(csound-event-string csound-obj evt-string)
+```
+
+sends an event defined as a string.
+
+
+```
+(csound-set-channel csound-obj channel val)
 ```
 
 sets the value of a bus channel
 
 
 ```
-(csound-get-channel csound-obj string)
+(csound-get-channel csound-obj channel)
 ```
 
 gets the value of a bus channel
