@@ -72,4 +72,28 @@ stops a Csound performance.
 
 toggles-pause a Csound performance.
 
-... more on the way!
+```
+(csound-compile-string csound-obj string)
+```
+
+compiles Csound code from a string.
+
+```
+(csound-event-string csound-obj string)
+```
+
+sends a event from a string.
+
+
+```
+(csound-set-channel csound-obj string real)
+```
+
+sets the value of a bus channel
+
+
+```
+(csound-get-channel csound-obj string)
+```
+
+gets the value of a bus channel
