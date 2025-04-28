@@ -106,6 +106,12 @@ sets the value of a bus channel
 
 gets the value of a bus channel
 
+```
+(csound-time cs)
+```
+
+returns a list with the current performance time in seconds and in sample frames.
+
 ## Embedding
 
 The cs-s7 interface can be embedded in other s7 applications. In the

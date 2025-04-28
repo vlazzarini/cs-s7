@@ -154,6 +154,15 @@ static s7_pointer set_channel(s7_scheme *sc, s7_pointer args) {
                                         "csound object");
 }
 
+static s7_pointer perf_time(s7_scheme *sc, s7_pointer args) {
+  cs_obj *cs  = (cs_obj *) s7_c_object_value(s7_car(args));
+  if(cs->csound == NULL) return NULL;
+  int64_t time_frames = csoundGetCurrentTimeSamples(cs->csound);
+  double time_secs = time_frames/csoundGetSr(cs->csound);                
+  return s7_list(sc, 2, s7_make_real(sc,time_secs),
+                 s7_make_integer(sc,time_frames));
+}
+
 static s7_pointer start(s7_scheme *sc, s7_pointer args) {
   if(cs_check(s7_car(args))) {
     cs_obj *cs  = (cs_obj *) s7_c_object_value(s7_car(args));
@@ -267,6 +276,10 @@ int32_t cs_s7(s7_scheme *sc) {
     s7_define_function(sc,"pause-csound",toggle_pause,1,0,false,
                        "(pause-csound csound-obj) pause/play "
                        "csound performance");
+   s7_define_function(sc,"csound-time", perf_time, 1, 0, false,
+                       "(csound-time csound-obj) "
+                       "returns the current performance time "
+                       "as a list (secs frames)");
     s7_define_function(sc, "csound?", is_csobj, 1, 0, false,
                        "(csound? anything) "
                        "returns #t if its argument is a csound object");
