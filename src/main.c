@@ -1,6 +1,6 @@
 /******************************************************************************/
 //
-// main.c: Csound S7 scheme interpreter main program
+// main.c: Csound s7 scheme interpreter main program
 // (c) V Lazzarini, 2025
 //
 // Redistribution and use in source and binary forms, with or without
@@ -32,28 +32,27 @@
 
 static s7_scheme *s7;
 
-static void bye(void) {
- s7_free(s7);
- fprintf(stderr, "cs-s7: finished.\n");
+static void bye() {
+  s7_free(s7);
+  fprintf(stderr, "cs-s7: finished.\n");
 }
 
 int main(int argc, char **argv) {
   s7 = s7_init();
-  csound_interface(s7);
-  atexit(bye);
-  fprintf(stdout, "cs-s7: Csound S7 scheme interpreter");
-  while (1) {
-    char buffer[512];
-    fprintf(stdout, "\ncs-s7>");
-    fgets(buffer, 512, stdin);
-    if ((buffer[0] != '\n') ||
-        (strlen(buffer) > 1)) {
-      char response[1024];
-      snprintf(response, 1024, "(write %s)", buffer);
-      s7_eval_c_string(s7, response); 
+  if(cs_s7(s7) == CSOUND_SUCCESS) {
+    atexit(bye);
+    fprintf(stdout, "cs-s7: Csound s7 scheme interpreter");
+    while (1) {
+      char buffer[512];
+      fprintf(stdout, "\ncs-s7>");
+      fgets(buffer, 512, stdin);
+      if ((buffer[0] != '\n') ||
+          (strlen(buffer) > 1)) {
+        char response[1024];
+        snprintf(response, 1024, "(write %s)", buffer);
+        s7_eval_c_string(s7, response); 
+      }
     }
   }
-  s7_quit(s7);
-  s7_free(s7);
   return 0;
 }

@@ -1,6 +1,6 @@
 /******************************************************************************/
 //
-// cs-s7.h: Csound S7 scheme 
+// cs-s7.h: Csound s7 scheme interface
 // (c) V Lazzarini, 2025
 //
 // Redistribution and use in source and binary forms, with or without
@@ -34,4 +34,4 @@
 #endif
 #include "s7.h"
 
-void csound_interface(s7_scheme *sc); 
+int32_t cs_s7(s7_scheme *sc); 

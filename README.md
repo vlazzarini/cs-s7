@@ -1,6 +1,6 @@
-# Csound S7 
+# Csound s7 
 
-This is the repository for the Csound S7 project, which combines the S7 scheme
+This is the repository for the Csound s7 project, which combines the s7 scheme
 interpreter (https://ccrma.stanford.edu/software/snd/snd/s7.html) and the
 Csound Sound and Music Computing System (https://csound.com). 
 
@@ -105,3 +105,13 @@ sets the value of a bus channel
 ```
 
 gets the value of a bus channel
+
+## Embedding
+
+The cs-s7 interface can be embedded in other s7 applications. In the
+original spirit of s7, this is provided as a single source/header
+pair, cs-s7.c and cs-s7.h. Applications still need to be linked to the
+Csound library. With the interface, the Csound functions described
+above are all made available to the interpreter.
+
+VL, April 2025.

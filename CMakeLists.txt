@@ -11,7 +11,7 @@ if(NOT CSOUND_FOUND)
       message(FATAL_ERROR "Csound library is required")
 endif()
 
-add_executable(cs-s7  ./src/interface.c ./src/main.c ./s7/s7.c)
+add_executable(cs-s7  ./src/cs-s7.c ./src/main.c ./s7/s7.c)
 
 if(APPLE) 
 target_link_libraries(cs-s7 ${CSOUND_FRAMEWORK})
