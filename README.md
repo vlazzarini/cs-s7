@@ -8,8 +8,8 @@ A simple performance run example:
 
 ```
 (define cs (make-csound))
-(compile-csound "code.csd")
-(start-csound cs)
+(csound-compile "code.csd")
+(csound-start cs)
 ```
 
 In this example, Csound runs on a separate thread, making the above
@@ -27,7 +27,8 @@ cmake ..
 make
 ```
 
-are used to build the `cs-s7` program.
+are used to build the `cs-s7` program. If libtecla is installed, the
+interpreter will use it for enhanced command editing.
 
 ## Running
 
@@ -49,34 +50,48 @@ creates a new Csound engine object.
 
 
 ```
-(compile-csound csound-obj filename)
+(csound-compile csound-obj filename)
 ```
 
-compiles Csound code from file.
+compiles Csound code from file before engine startup, non-op on a
+running engine.
 
 ```
-(start-csound csound-obj)
+(csound-options csound-obj options-str)
+```
+
+sets engine options from a string before engine startup, non-op on a
+running engine.
+
+```
+(csound-start csound-obj)
 ```
 
 starts the Csound engine and performance.
 
 ```
-(stop-csound csound-obj)
+(csound-stop csound-obj)
 ```
 
-stops a Csound performance.
+stops a Csound performance and resets the engine.
 
 ```
-(pause-csound csound-obj)
+(csound-pause csound-obj)
 ```
 
 toggles-pause a Csound performance.
 
 ```
+(csound-play csound-obj)
+```
+
+re-starts a Csound performance from pause.
+
+```
 (csound-compile-string csound-obj code-string)
 ```
 
-compiles Csound code from a string.
+compiles Csound code from a string before or after engine startup.
 
 
 ```

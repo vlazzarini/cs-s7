@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 
 project(cs-s7)
 
@@ -11,7 +11,19 @@ if(NOT CSOUND_FOUND)
       message(FATAL_ERROR "Csound library is required")
 endif()
 
+find_library(TECLA tecla HINTS /opt/homebrew/lib /usr/local/lib)
+
+
 add_executable(cs-s7  ./src/cs-s7.c ./src/main.c ./s7/s7.c)
+if(NOT TECLA)
+   message(STATUS "libtecla not found")
+else()
+  message(STATUS "libtecla found")
+  target_link_libraries(cs-s7 ${TECLA})
+  find_path(TECLA_INCLUDE_DIR libtecla.h HINTS /opt/homebrew/include /usr/local/include)
+  target_include_directories(cs-s7 PRIVATE ${TECLA_INCLUDE_DIR})
+  target_compile_definitions(cs-s7 PRIVATE USE_TECLA)
+endif()
 
 if(APPLE) 
 target_link_libraries(cs-s7 ${CSOUND_FRAMEWORK})

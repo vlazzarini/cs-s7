@@ -28,29 +28,46 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#ifdef USE_TECLA
+#include <libtecla.h>
+#endif
+
 #include "cs-s7.h"
 
 static s7_scheme *s7;
+void *tp = NULL;
 
 static void bye() {
   s7_free(s7);
+  if(tp != NULL) del_GetLine(tp);
   fprintf(stderr, "cs-s7: finished.\n");
 }
 
 int main(int argc, char **argv) {
+
+#ifdef USE_TECLA
+  GetLine *gl = new_GetLine(500, 5000);
+  tp = gl;
+#endif  
   s7 = s7_init();
   if(cs_s7(s7) == CSOUND_SUCCESS) {
     atexit(bye);
     fprintf(stdout, "cs-s7: Csound s7 scheme interpreter");
     while (1) {
-      char buffer[512];
+#ifdef USE_TECLA
+      char *buffer;
+      fprintf(stdout, "\n");
+      buffer = gl_get_line(gl, "cs-s7> ", NULL, 0);
+#else      
+      char buffer[512]; 
       fprintf(stdout, "\ncs-s7>");
       fgets(buffer, 512, stdin);
+#endif      
       if ((buffer[0] != '\n') ||
           (strlen(buffer) > 1)) {
         char response[1024];
         snprintf(response, 1024, "(write %s)", buffer);
-        s7_eval_c_string(s7, response); 
+        s7_eval_c_string(s7, response);
       }
     }
   }
