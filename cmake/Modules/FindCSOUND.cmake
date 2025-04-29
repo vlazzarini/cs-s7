@@ -20,7 +20,11 @@ find_path(CSOUND_FRAMEWORK32 CsoundLib HINTS
  /Library/Frameworks/CsoundLib64.framework 
  "$ENV{HOME}/Library/Frameworks/CsoundLib.framework"
  /Library/Frameworks/CsoundLib.framework
-  ${CSOUND_FRAMEWORK32_DIR_HINT}) 
+  ${CSOUND_FRAMEWORK32_DIR_HINT})
+find_path(CSOUND_FRAMEWORK_DIR CsoundLib64.framework
+"$ENV{HOME}/Library/Frameworks/CsoundLib64.framework"
+ /Library/Frameworks/CsoundLib64.framework
+  ${CSOUND_FRAMEWORK_DIR_HINT})
 else()
 find_path(CSOUND_INCLUDE_DIR csound.h PATH_SUFFIXES csound HINTS ${CSOUND_INCLUDE_DIR_HINT})
 endif()
