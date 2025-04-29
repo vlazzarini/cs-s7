@@ -39,7 +39,9 @@ void *tp = NULL;
 
 static void bye() {
   s7_free(s7);
+#ifdef USE_TECLA  
   if(tp != NULL) del_GetLine(tp);
+#endif  
   fprintf(stderr, "cs-s7: finished.\n");
 }
 

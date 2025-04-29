@@ -37,7 +37,7 @@ cs-s7: Csound S7 scheme interpreter
 cs-s7>
 ```
 
-## Functions
+### Functions
 
 ```
 (make-csound)
@@ -125,7 +125,7 @@ gets the value of a bus channel
 returns a list with the current performance time in seconds and in
 sample frames.
 
-## Example
+### Example
 
 A typical set of REPL commands to play a CSD from a file should be
 
