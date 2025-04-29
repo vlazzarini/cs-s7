@@ -320,9 +320,15 @@ typedef struct {
   OPDS h;
   MYFLT *out;
   STRINGDAT *code;
-} OPC;
+} OPCO;
 
-static int32_t  interp_call(CSOUND *csound, OPC *p) {
+typedef struct {
+  OPDS h;
+  STRINGDAT *code;
+  MYFLT *in;
+} OPCI;
+
+static int32_t  interp_call(CSOUND *csound, OPCO *p) {
   s7_scheme *s7 = *((s7_scheme **)
                      csound->QueryGlobalVariable(csound, "_S7_"));
   
@@ -333,10 +339,20 @@ static int32_t  interp_call(CSOUND *csound, OPC *p) {
   return OK;
 }
 
+static int32_t define_var(CSOUND *csound, OPCI *p) {
+  s7_scheme *s7 = *((s7_scheme **)
+                     csound->QueryGlobalVariable(csound, "_S7_"));
+  s7_define_variable(s7, (const char*) p->code->data, s7_make_real(s7, *p->in));
+  return OK;
+}
+
+
 int32_t append_opcodes(CSOUND *csound, s7_scheme *s7) {
   int32_t res;
-  res = csoundAppendOpcode(csound, "s7eval", sizeof(OPC), 0,
+  res = csoundAppendOpcode(csound, "s7eval", sizeof(OPCO), 0,
                            "i", "S", (SUBR) interp_call, NULL, NULL);
+  res = csoundAppendOpcode(csound, "s7definevar", sizeof(OPCI), 0,
+                           "", "Si", (SUBR) define_var, NULL, NULL);
 
   if(csound->CreateGlobalVariable(csound, "_S7_", sizeof(s7_scheme *))
      == CSOUND_SUCCESS) {
