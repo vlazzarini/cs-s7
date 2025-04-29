@@ -27,6 +27,7 @@
 /******************************************************************************/
 #include "cs-s7.h"
 
+static int32_t append_opcodes(CSOUND *csound, s7_scheme *s7); 
 static int cs_type_tag = 0;
 typedef struct {
   CSOUND *csound;
@@ -43,10 +44,12 @@ static inline bool cs_check(s7_pointer obj){
 static s7_pointer create(s7_scheme *sc, s7_pointer args) {
   cs_obj *cs = (cs_obj *) calloc(1, sizeof(cs_obj));
   cs->csound = csoundCreate(cs, NULL);
-  csoundSetOption(cs->csound, "-odac");
-  cs->perf = NULL;
-  cs->pause = false;
-  return s7_make_c_object(sc, cs_type_tag, (void *) cs);
+  if(append_opcodes(cs->csound, sc) == CSOUND_SUCCESS) {
+    csoundSetOption(cs->csound, "-odac");
+    cs->perf = NULL;
+    cs->pause = false;
+    return s7_make_c_object(sc, cs_type_tag, (void *) cs);
+  } else return NULL;
 }
 
 static s7_pointer compile(s7_scheme *sc, s7_pointer args) {
@@ -174,9 +177,9 @@ static s7_pointer start(s7_scheme *sc, s7_pointer args) {
     if(cs->perf) return s7_make_integer(sc, -1);
     res = csoundStart(cs->csound);
     if(res == CSOUND_SUCCESS){
-      cs->perf = csoundCreatePerformanceThread(cs->csound);
-      if(cs->perf) csoundPerformanceThreadPlay(cs->perf);
-    }
+       cs->perf = csoundCreatePerformanceThread(cs->csound);
+       if(cs->perf) csoundPerformanceThreadPlay(cs->perf);
+    } else return NULL;
     return s7_make_integer(sc, res);
   } return s7_wrong_type_arg_error(sc,"csound-start",0,s7_car(args),
                                    "csound-obj");
@@ -192,6 +195,8 @@ static s7_pointer stop(s7_scheme *sc, s7_pointer args) {
       cs->perf = NULL;
       csoundReset(cs->csound);
       csoundSetOption(cs->csound, "-odac");
+      if(append_opcodes(cs->csound, sc)
+         != CSOUND_SUCCESS) return NULL;
       return s7_make_integer(sc, 0);
     } else return s7_make_integer(sc, -1);
   } return s7_wrong_type_arg_error(sc,"csound-stop",0,s7_car(args),
@@ -252,6 +257,8 @@ static s7_pointer csobj_is_equal(s7_scheme *sc, s7_pointer args){
   return s7_make_boolean(sc, (obj1->csound == obj2->csound));
 }
 
+
+
 /**
  *   s7 interpreter interface 
  **/
@@ -302,4 +309,42 @@ int32_t cs_s7(s7_scheme *sc) {
   }
   return res;
 }
+
 /******************************************************************************/
+// opcodes
+//
+//
+/******************************************************************************/
+
+typedef struct {
+  OPDS h;
+  MYFLT *out;
+  STRINGDAT *code;
+} OPC;
+
+static int32_t  interp_call(CSOUND *csound, OPC *p) {
+  s7_scheme *s7 = *((s7_scheme **)
+                     csound->QueryGlobalVariable(csound, "_S7_"));
+  
+  s7_pointer res = s7_eval_c_string(s7, (const char*) p->code->data);
+  if(s7_is_real(res)) *p->out = s7_real(res);
+  else if(s7_is_integer(res)) *p->out = (MYFLT) s7_integer(res);
+  else *p->out = 0.;
+  return OK;
+}
+
+int32_t append_opcodes(CSOUND *csound, s7_scheme *s7) {
+  int32_t res;
+  res = csoundAppendOpcode(csound, "s7eval", sizeof(OPC), 0,
+                           "i", "S", (SUBR) interp_call, NULL, NULL);
+
+  if(csound->CreateGlobalVariable(csound, "_S7_", sizeof(s7_scheme *))
+     == CSOUND_SUCCESS) {
+    s7_scheme **s7p = (s7_scheme **) csound->QueryGlobalVariable(csound, "_S7_");
+    *s7p = s7;
+  } else {
+    csound->ErrorMsg(csound, "could not allocate global var for s7 interpreter\n");
+    return NOTOK;
+  }
+  return OK;
+}
