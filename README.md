@@ -155,7 +155,23 @@ open /System/Applications/Utilities/Console.app ~/tmp/cs.log
 ```
 
 this will log all Csound messages, which will not get in the way of
-the REPL.
+the REPL. Of course we can always load s7 code from files, which
+can be formatted more conveniently etc. This is particularlly useful
+for multiline Csound code strings. For example, the following
+program starts csound and then compiles code from a string,
+
+```
+(define cs (make-csound))
+(csound-options cs "--0dbfs=1")
+(csound-start cs)
+(define code "instr 1
+             sig:a = oscili(p4, p5)
+             out(linen(sig,0.1,p3,0.1))
+             endin
+             schedule(1,0,1,0.5,440)
+             ")
+(csound-compile-string cs code)
+```
 
 ## Opcodes
 
