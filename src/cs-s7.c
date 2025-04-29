@@ -27,6 +27,8 @@
 /******************************************************************************/
 #include "cs-s7.h"
 
+#ifndef BUILDING_MODULE
+
 static int32_t append_opcodes(CSOUND *csound, s7_scheme *s7); 
 static int cs_type_tag = 0;
 typedef struct {
@@ -310,9 +312,11 @@ int32_t cs_s7(s7_scheme *sc) {
   return res;
 }
 
+#endif
+
 /******************************************************************************/
 // opcodes
-//
+// 
 //
 /******************************************************************************/
 
@@ -331,7 +335,6 @@ typedef struct {
 static int32_t  interp_call(CSOUND *csound, OPCO *p) {
   s7_scheme *s7 = *((s7_scheme **)
                      csound->QueryGlobalVariable(csound, "_S7_"));
-  
   s7_pointer res = s7_eval_c_string(s7, (const char*) p->code->data);
   if(s7_is_real(res)) *p->out = s7_real(res);
   else if(s7_is_integer(res)) *p->out = (MYFLT) s7_integer(res);
@@ -349,9 +352,9 @@ static int32_t define_var(CSOUND *csound, OPCI *p) {
 
 int32_t append_opcodes(CSOUND *csound, s7_scheme *s7) {
   int32_t res;
-  res = csoundAppendOpcode(csound, "s7eval", sizeof(OPCO), 0,
+  res = csound->AppendOpcode(csound, "s7eval", sizeof(OPCO), 0,
                            "i", "S", (SUBR) interp_call, NULL, NULL);
-  res = csoundAppendOpcode(csound, "s7definevar", sizeof(OPCI), 0,
+  res = csound->AppendOpcode(csound, "s7definevar", sizeof(OPCI), 0,
                            "", "Si", (SUBR) define_var, NULL, NULL);
 
   if(csound->CreateGlobalVariable(csound, "_S7_", sizeof(s7_scheme *))
@@ -363,4 +366,28 @@ int32_t append_opcodes(CSOUND *csound, s7_scheme *s7) {
     return NOTOK;
   }
   return OK;
+}
+
+int32_t csoundModuleCreate(CSOUND *csound) {
+  // check to see if module has already been loaded
+  if(csound->QueryGlobalVariable(csound, "_S7_") != NULL) return CSOUND_ERROR;
+  return OK;
+}
+
+int32_t csoundModuleInit(CSOUND *csound) {
+    return append_opcodes(csound, s7_init());
+}
+
+int32_t csoundModuleDestroy(CSOUND *csound)
+{
+    s7_scheme *s7 = *((s7_scheme **)
+                     csound->QueryGlobalVariable(csound, "_S7_"));
+    if(s7 != NULL) s7_free(s7);
+    csound->DestroyGlobalVariable(csound, "_S7_");
+    return OK;
+}
+
+int32_t csoundModuleInfo(void)
+{
+    return ((CS_VERSION << 16) + (CS_SUBVER << 8) + (int32_t) sizeof(MYFLT));
 }

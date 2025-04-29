@@ -15,6 +15,8 @@ find_library(TECLA tecla HINTS /opt/homebrew/lib /usr/local/lib)
 
 
 add_executable(cs-s7  ./src/cs-s7.c ./src/main.c ./s7/s7.c)
+add_library(css7 SHARED ./src/cs-s7.c ./s7/s7.c)
+
 if(NOT TECLA)
    message(STATUS "libtecla not found")
 else()
@@ -31,6 +33,8 @@ else()
 target_link_libraries(cs-s7 ${CSOUND_LIBRARY})
 endif()
 target_include_directories(cs-s7 PRIVATE ./src ./s7)
-
-
-
+target_include_directories(css7 PRIVATE ./src ./s7 ${CSOUND_INCLUDE_DIRS})
+target_compile_definitions(css7 PRIVATE BUILDING_MODULE)
+if(APPLE)
+target_compile_options(css7 PRIVATE -F$ENV{HOME}/Library/frameworks -F/Library/frameworks)
+endif()

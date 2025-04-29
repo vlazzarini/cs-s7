@@ -183,6 +183,11 @@ cs-s7> (csound-event cs 0 2 0 0)
 cs-s7> instr 2:	#i0 = 6.000
 ```
 
+These opcodes can also be used in other Csound applications (beyond
+cs-s7) by loading the plugin library `libcss7.{so,dylib,dll}`
+(e.g. with `--opcode-lib=`). In this case, the library module starts
+an internal s7 interpreter, which is used by the opcodes.
+
 Other opcodes will follow...
 
 ## Embedding
