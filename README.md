@@ -125,7 +125,65 @@ gets the value of a bus channel
 (csound-time cs)
 ```
 
-returns a list with the current performance time in seconds and in sample frames.
+returns a list with the current performance time in seconds and in
+sample frames.
+
+## Opcodes
+
+The cs-s7 interface also adds opcodes for accessing the interpreter
+from Csound code.
+
+```
+res:i = s7eval(code:S)
+```
+
+evaluates a code string, returning the result (real or integer results only)
+
+```
+s7definevar(var:s, value:i)
+```
+
+defines a variable with a given value.
+
+Here is a trivial example
+
+```
+instr s7test
+ s7definevar("x", 1)
+ res:i = s7eval("(+ x 2)")
+ print(res)
+endin
+schedule(s7test,0,0)
+```
+
+which should print
+
+```
+new alloc (instance 1) for instr s7test:
+cs-s7> instr 1:	res = 3.000
+```
+
+These opcodes also allow a direct connection between the interpreter
+and Csound code. For example, if we compile this instrument
+
+```
+instr 2
+ res:i = s7eval("(+ x 2)")
+ print(res)
+endin
+```
+
+we can use the value of a variable `x` defined in the interpreter,
+
+```
+cs-s7> (define x 4)
+4
+cs-s7> (csound-event cs 0 2 0 0)
+#t
+cs-s7> instr 2:	#i0 = 6.000
+```
+
+Other opcodes will follow...
 
 ## Embedding
 
