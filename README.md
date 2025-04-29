@@ -4,20 +4,16 @@ This is the repository for the Csound s7 project, which combines the s7 scheme
 interpreter (https://ccrma.stanford.edu/software/snd/snd/s7.html) and the
 Csound Sound and Music Computing System (https://csound.com). 
 
-A simple performance run example:
+The project consists of two components
 
-```
-(define cs (make-csound))
-(csound-compile "code.csd")
-(csound-start cs)
-```
-
-In this example, Csound runs on a separate thread, making the above
-ideal for REPL use.
+- The `cs-s7` interpreter program - provides a REPL with functions and
+  opcodes to interface Csound with s7 (and vice-versa).
+- The `libcss7` plugin module - provides an s7 interpreter accessible
+  by Csound through a library of opcodes.
 
 ## Building
 
-CMake is used for building the cs-s7 interpreter. With Csound installed,
+CMake is used for building the project. With Csound installed,
 the commands
 
 ```
@@ -27,8 +23,9 @@ cmake ..
 make
 ```
 
-are used to build the `cs-s7` program. If libtecla is installed, the
-interpreter will use it for enhanced command editing.
+are used to build the `cs-s7` program and the `libcss7.{so,
+dylib,dll}`. 
+If libtecla is installed, the `cs-s7` REPL will use it for enhanced command editing.
 
 ## Running
 
@@ -67,13 +64,13 @@ running engine.
 (csound-start csound-obj)
 ```
 
-starts the Csound engine and performance.
+starts the Csound engine and performance thread.
 
 ```
 (csound-stop csound-obj)
 ```
 
-stops a Csound performance and resets the engine.
+stops a Csound performance thread and resets the engine.
 
 ```
 (csound-pause csound-obj)
@@ -127,6 +124,38 @@ gets the value of a bus channel
 
 returns a list with the current performance time in seconds and in
 sample frames.
+
+## Example
+
+A typical set of REPL commands to play a CSD from a file should be
+
+```
+cs-s7>(define cs (make-csound))
+cs-s7>(csound-compile cs "test.csd")
+cs-s7>(csound-start cs)
+```
+
+Realtime output is enforced by default (`-odac`) but this can be
+overriden by options set in the CSD or with the appropriate function.
+Processing is done in a separate thread and so the REPL is
+continuously available to accept input. Csound messages are
+sent to stderr, unless suppressed, or redirected. If stderr is the terminal, then
+they will be shown together with the REPL printouts. One possibility
+is to redirect the stderr to a log file or console. On MacOS, we can
+start the interpreter with the command
+
+```
+cs-s7 2> ~/tmp/cs.log
+```
+
+and open the log file in the console (e.g. using another terminal window)
+
+```
+open /System/Applications/Utilities/Console.app ~/tmp/cs.log
+```
+
+this will log all Csound messages, which will not get in the way of
+the REPL.
 
 ## Opcodes
 
