@@ -175,17 +175,30 @@ program starts csound and then compiles code from a string,
 (define cs (make-csound))
 (csound-options cs "--0dbfs=1")
 (csound-start cs)
-(define code "instr 1
-               sig:a = oscili(p4, p5)
-               out(linen(sig,0.1,p3,0.1))
-              endin
-              schedule(1,0,1,0.5,440)
+(define code "
+   instr 1
+    sig:a = oscili(p4, p5)
+    out(linen(sig,0.1,p3,0.1))
+   endin
+   schedule(1,0,1,0.5,440)
              ")
 (csound-compile-string cs code)
 ```
 
-Unfortunately, due to line continuation, this code cannot be run in the REPL in this
-form, as each command needs to terminate on a line end.
+Unfortunately, due to line continuation, this code cannot be run in
+the `cs-s7` REPL in this form, as each command needs to terminate on a
+line end. However, s7 provides a handy REPL in repl.scm. With this
+and some other s7 files, we can run a more fully-featured REPL
+by running this code
+
+```
+cs-s7>(load "repl.scm")((*repl* 'run))
+```
+
+The `cs-s7` command needs to be run from the s7 sources directory
+so all the relevant files can be found. The REPL will then allow 
+multine strings etc as well as other facilities such as command
+completion. See the s7 manual for more information.
 
 ## Opcodes
 
