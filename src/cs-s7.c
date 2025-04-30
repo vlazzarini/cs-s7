@@ -170,6 +170,7 @@ static s7_pointer start(s7_scheme *sc, s7_pointer args) {
     int32_t res;
     if(cs->perf) return s7_make_integer(sc, -1);
     res = csoundStart(cs->csound);
+    if(s7_cadr(args)) printf("extra arg\n");
     if(res == CSOUND_SUCCESS){
        cs->perf = csoundCreatePerformanceThread(cs->csound);
        if(cs->perf) csoundPerformanceThreadPlay(cs->perf);
@@ -194,7 +195,7 @@ static s7_pointer stop(s7_scheme *sc, s7_pointer args) {
         return s7_error(sc, s7_make_symbol(sc, "failed-csound-reset"),
                   s7_list(sc, 1,  s7_car(s7_make_integer(sc, res))));
     } 
-    return s7_make_c_object(sc, cs_type_tag, (void *) cs);
+    return s7_car(args);
   } return cs_type_err(sc, args,"csound-stop");
 }
 
@@ -253,7 +254,7 @@ int32_t cs_s7(s7_scheme *sc) {
     s7_c_type_set_is_equal(sc,cs_type_tag,csobj_is_equal);
     s7_define_function(sc,"make-csound",create,0,0,false,
                        "(make-csound) creates a csound-obj");
-    s7_define_function(sc,"csound-start",start,1,0,false,
+    s7_define_function(sc,"csound-start",start,1,1,false,
                        "(csound-start csound-obj) starts csound performance");
     s7_define_function(sc,"csound-stop",stop,1,0,false,
                        "(csound-stop csound-obj) starts csound performance");
