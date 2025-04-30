@@ -47,11 +47,10 @@ creates a new Csound engine object.
 
 
 ```
-(csound-compile csound-obj filename)
+(csound-compile csound-obj csdfile)
 ```
 
-compiles Csound code from file before engine startup, non-op on a
-running engine.
+compiles Csound code from CSD file.
 
 ```
 (csound-options csound-obj options-str)
@@ -61,10 +60,11 @@ sets engine options from a string before engine startup, non-op on a
 running engine.
 
 ```
-(csound-start csound-obj)
+(csound-start csound-obj (sync 0))
 ```
 
-starts the Csound engine and performance thread.
+starts the Csound engine and performance thread, optionally
+synchronously `:sync 1`.
 
 ```
 (csound-stop csound-obj)
@@ -78,6 +78,11 @@ stops a Csound performance thread and resets the engine.
 
 toggles-pause/play a Csound performance.
 
+```
+(csound-is-asynchronous csound-obj)
+```
+
+returns the status of asynchronous performance.
 
 ```
 (csound-compile-string csound-obj code-string)
@@ -106,12 +111,18 @@ sends an event defined as a string.
 
 sets the value of a bus channel
 
-
 ```
 (csound-get-channel csound-obj channel)
 ```
 
 gets the value of a bus channel
+
+```
+(csound-perform-ksmps cs)
+```
+
+performs one ksmps-full of sample frames, synchronously. Non-op on
+asynchronous performance.
 
 ```
 (csound-time cs)
