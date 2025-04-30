@@ -364,6 +364,10 @@ static int32_t define_var(CSOUND *csound, OPCI *p) {
 int32_t append_opcodes(CSOUND *csound, s7_scheme *s7) {
   int32_t res;
   res = csound->AppendOpcode(csound, "s7eval", sizeof(OPCO), 0,
+                             "k", "S", NULL, (SUBR) interp_call, NULL);
+  res = csound->AppendOpcode(csound, "s7definevar", sizeof(OPCI), 0,
+                             "", "Sk", NULL, (SUBR) define_var, NULL);
+  res = csound->AppendOpcode(csound, "s7eval", sizeof(OPCO), 0,
                            "i", "S", (SUBR) interp_call, NULL, NULL);
   res = csound->AppendOpcode(csound, "s7definevar", sizeof(OPCI), 0,
                            "", "Si", (SUBR) define_var, NULL, NULL);

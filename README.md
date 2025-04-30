@@ -143,7 +143,7 @@ cs-s7>(csound-start cs)
 
 Realtime output is enforced by default (`-odac`) but this can be
 overriden by options set in the CSD or with the appropriate function.
-Processing is done in a separate thread and so the REPL is
+Processing is done by default in a separate thread (asynchronous) and so the REPL is
 continuously available to accept input. Csound messages are
 sent to stderr, unless suppressed, or redirected. If stderr is the terminal, then
 they will be shown together with the REPL printouts. One possibility
@@ -186,15 +186,19 @@ from Csound code.
 
 ```
 res:i = s7eval(code:S)
+res:k = s7eval(code:S)
 ```
 
-evaluates a code string, returning the result (real or integer results only)
+evaluates a code string, returning the result (real or integer results
+only), at init and perf-times. Note that perf-time code executes at
+every k-cycle, so it may need to be protected with flow-control.
 
 ```
 s7definevar(var:s, value:i)
+s7definevar(var:s, value:k)
 ```
 
-defines a variable with a given value.
+defines a variable with a given value, similar comments apply here.
 
 Here is a trivial example
 
