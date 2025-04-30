@@ -37,7 +37,7 @@ cs-s7: Csound S7 scheme interpreter
 cs-s7>
 ```
 
-### Functions
+## Functions
 
 ```
 (make-csound)
@@ -208,6 +208,10 @@ s7definevar(var:s, value:k)
 
 defines a variable with a given value, similar comments apply here.
 
+Other opcodes will follow...
+
+### Example
+
 Here is a trivial example
 
 ```
@@ -246,12 +250,14 @@ cs-s7> (csound-event cs 0 2 0 0)
 cs-s7> instr 2:	#i0 = 6.000
 ```
 
-These opcodes can also be used in other Csound applications (beyond
-cs-s7) by loading the plugin library `libcss7.{so,dylib,dll}`
-(e.g. with `--opcode-lib=`). In this case, the library module starts
-an internal s7 interpreter, which is used by the opcodes.
+## Plugin Library
 
-Other opcodes will follow...
+The cs-s7 opcodes can also be used in other Csound applications (beyond
+the `cs-s7` program) by loading the plugin library `libcss7.{so,dylib,dll}`
+(e.g. with `--opcode-lib=`). In this case, the library module starts
+an internal s7 interpreter, which is used by the opcodes. The opcode
+library returns a non-fatal error if attempted to be loaded in a `cs-s7`
+REPL session as the opcodes are already present in that case.
 
 ## Embedding
 
