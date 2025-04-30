@@ -43,14 +43,16 @@ cs-s7>
 (make-csound)
 ```
 
-creates a new Csound engine object.
-
+creates a new Csound engine object. Realtime audio is enabled by
+default, but this can be changed by options set before the engine is
+started. Multiple Csound objects may be created.
 
 ```
 (csound-compile csound-obj csdfile)
 ```
 
-compiles Csound code from CSD file.
+compiles Csound code from CSD file. The <CsOptions> section is only 
+relevant before the engine is started.
 
 ```
 (csound-options csound-obj options-str)
@@ -63,20 +65,24 @@ running engine.
 (csound-start csound-obj (sync 0))
 ```
 
-starts the Csound engine and performance thread, optionally
-synchronously `:sync 1`.
+starts the Csound engine, optionally synchronously `:sync 1` 
+(defaults to asynchronous mode). In synchronous performance,
+processing needs to be run by calling `(csound-perform-ksmps
+csound-obj)` (see below); in asynchronous performance this
+is run in a separate thread loop, which starts immediately.
 
 ```
 (csound-stop csound-obj)
 ```
 
-stops a Csound performance thread and resets the engine.
+stops a Csound and resets the engine. Also re-enables realtime audio
+as default. The performance may be restarted from this point.
 
 ```
 (csound-pause csound-obj)
 ```
 
-toggles-pause/play a Csound performance.
+toggles-pause/play a Csound performance (asynchronous mode)
 
 ```
 (csound-is-asynchronous csound-obj)
@@ -88,8 +94,7 @@ returns the status of asynchronous performance.
 (csound-compile-string csound-obj code-string)
 ```
 
-compiles Csound code from a string before or after engine startup.
-
+compiles Csound code from a string.
 
 ```
 (csound-event csound-obj type p1 p2 p3 ...)
@@ -109,13 +114,13 @@ sends an event defined as a string.
 (csound-set-channel csound-obj channel val)
 ```
 
-sets the value of a bus channel
+sets the value of a (control) bus channel.
 
 ```
 (csound-get-channel csound-obj channel)
 ```
 
-gets the value of a bus channel
+gets the value of a (control) bus channel.
 
 ```
 (csound-perform-ksmps cs)
@@ -178,6 +183,9 @@ program starts csound and then compiles code from a string,
              ")
 (csound-compile-string cs code)
 ```
+
+Unfortunately, due to line continuation, this code cannot be run in the REPL in this
+form, as each command needs to terminate on a line end.
 
 ## Opcodes
 
