@@ -76,13 +76,8 @@ stops a Csound performance thread and resets the engine.
 (csound-pause csound-obj)
 ```
 
-toggles-pause a Csound performance.
+toggles-pause/play a Csound performance.
 
-```
-(csound-play csound-obj)
-```
-
-re-starts a Csound performance from pause.
 
 ```
 (csound-compile-string csound-obj code-string)
@@ -165,10 +160,10 @@ program starts csound and then compiles code from a string,
 (csound-options cs "--0dbfs=1")
 (csound-start cs)
 (define code "instr 1
-             sig:a = oscili(p4, p5)
-             out(linen(sig,0.1,p3,0.1))
-             endin
-             schedule(1,0,1,0.5,440)
+               sig:a = oscili(p4, p5)
+               out(linen(sig,0.1,p3,0.1))
+              endin
+              schedule(1,0,1,0.5,440)
              ")
 (csound-compile-string cs code)
 ```
