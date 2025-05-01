@@ -54,6 +54,26 @@ int main(int argc, char **argv) {
   s7 = s7_init();
   if(cs_s7(s7) == CSOUND_SUCCESS) {
     atexit(bye);
+    if (argc > 1) {
+      int32_t i;
+      for (int32_t i = 1; i < argc; i++) {
+        if(!strcmp(argv[i], "-e")) {
+          if(argc > i+1){
+            char *s;
+            s7_pointer p = s7_eval_c_string(s7, argv[++i]);
+            s = s7_object_to_c_string(s7, p);
+            fprintf(stdout, "%s", s);
+            free(s);
+          }
+        }
+        else {
+          if (!s7_load(s7, argv[i])) {
+            fprintf(stderr, "error loading %s\n", argv[i]);
+            return 2;
+          }
+        }
+      }
+    }
     fprintf(stdout, "cs-s7: Csound s7 scheme interpreter");
     while (1) {
 #ifdef USE_TECLA
