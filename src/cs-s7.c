@@ -180,12 +180,12 @@ static s7_pointer perf_time(s7_scheme *sc, s7_pointer args) {
 static s7_pointer start(s7_scheme *sc, s7_pointer args) {
   if(cs_check(s7_car(args))) {
     cs_obj *cs  = (cs_obj *) s7_c_object_value(s7_car(args));
-    int32_t res, sync = 0;
+    int32_t res;
+    bool async;
     if(cs->perf) return s7_make_integer(sc, -1);
     res = csoundStart(cs->csound);
-    if(s7_list_length(sc, args) == 2)
-      sync = s7_integer(s7_cadr(args));
-    if(res == CSOUND_SUCCESS && !sync){
+    async = s7_boolean(sc, s7_cadr(args));
+    if(res == CSOUND_SUCCESS && async){
        cs->perf = csoundCreatePerformanceThread(cs->csound);
        if(cs->perf) csoundPerformanceThreadPlay(cs->perf);
     } 
@@ -219,7 +219,7 @@ static s7_pointer is_async(s7_scheme *sc, s7_pointer args) {
     bool async = false;
     if(cs->perf) async = true;
     return s7_make_boolean(sc, async);
-  } return cs_type_err(sc, args,"csound-stop");
+  } return cs_type_err(sc, args,"csound-async?");
 }
 
 static s7_pointer toggle_pause(s7_scheme *sc, s7_pointer args) {
@@ -229,8 +229,15 @@ static s7_pointer toggle_pause(s7_scheme *sc, s7_pointer args) {
      csoundPerformanceThreadTogglePause(cs->perf);
      cs->pause = !cs->pause;
     }
-    return s7_make_boolean(sc, cs->pause);
+    return s7_make_integer(sc, cs->pause ? 1 : 0);
   } return cs_type_err(sc, args,"csound-pause");
+}
+
+static s7_pointer is_paused(s7_scheme *sc, s7_pointer args) {
+  if(cs_check(s7_car(args))) {
+    cs_obj *cs  = (cs_obj *) s7_c_object_value(s7_car(args));
+    return s7_make_boolean(sc, cs->pause);
+  } return cs_type_err(sc, args,"csound-paused?");
 }
 
 static s7_pointer free_csobj(s7_scheme *sc, s7_pointer obj){
@@ -278,16 +285,18 @@ int32_t cs_s7(s7_scheme *sc) {
     s7_define_function(sc,"make-csound",create,0,0,false,
                        "(make-csound) creates a csound-obj");
     s7_define_function_star(sc,"csound-start", start,
-                            "csound-obj (sync 0)",
-                            "(csound-start csound-obj (sync 0)) "
+                            "csound-obj (async #t)",
+                            "(csound-start csound-obj (async 1)) "
                             "starts csound performance "
                             "(defaults to asynchronous)");
     s7_define_function(sc,"csound-stop",stop,1,0,false,
                        "(csound-stop csound-obj) starts csound performance");
-    s7_define_function(sc,"csound-is-async", is_async,1,0,false,
-                       "(csound-is-async csound-obj) returns async status");
+    s7_define_function(sc,"csound-async?", is_async,1,0,false,
+                       "(csound-async? csound-obj) returns async status");
     s7_define_function(sc,"csound-pause",toggle_pause,1,0,false,
                        "(csound-pause csound-obj) toggles performance pause");
+    s7_define_function(sc,"csound-paused?",is_paused,1,0,false,
+                       "(csound-paused? csound-obj) returns performance status");
     s7_define_function(sc,"csound-compile",compile,2,0,false,
                        "(csound-compile csound_obj filename) "
                        "compiles a CSD file");

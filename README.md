@@ -37,6 +37,15 @@ cs-s7: Csound S7 scheme interpreter
 cs-s7>
 ```
 
+The command takes arguments in the form of files to be loaded
+or scheme expressions to be evaluated,
+
+```
+cs-s7 [file.scm] [-e "scheme-expression"] 
+```
+
+any number of arguments in these forms are accepted.
+
 ## Functions
 
 ```
@@ -62,13 +71,13 @@ sets engine options from a string before engine startup, non-op on a
 running engine.
 
 ```
-(csound-start csound-obj (sync 0))
+(csound-start csound-obj (async #t))
 ```
 
-starts the Csound engine, optionally synchronously `:sync 1` 
-(defaults to asynchronous mode). In synchronous performance,
-processing needs to be run by calling `(csound-perform-ksmps
-csound-obj)` (see below); in asynchronous performance this
+starts the Csound engine, asynchronously by default. 
+In synchronous performance, processing needs to be run by calling
+`(csound-perform-ksmps csound-obj)` (see below); 
+in asynchronous performance this
 is run in a separate thread loop, which starts immediately.
 
 ```
@@ -85,10 +94,16 @@ as default. The performance may be restarted from this point.
 toggles-pause/play a Csound performance (asynchronous mode)
 
 ```
-(csound-is-asynchronous csound-obj)
+(csound-paused? csound-obj)
 ```
 
-returns the status of asynchronous performance.
+returns the performance status.
+
+```
+(csound-async? csound-obj)
+```
+
+returns whether performance is asynchronous or not.
 
 ```
 (csound-compile-string csound-obj code-string)
@@ -189,13 +204,15 @@ Unfortunately, due to line continuation, this code cannot be run in
 the `cs-s7` REPL in this form, as each command needs to terminate on a
 line end. However, s7 provides a handy REPL in repl.scm. With this
 and some other s7 files, we can run a more fully-featured REPL
-by running this code
+by loading the repl.scm in the command line and starting it
 
 ```
-cs-s7>(load "repl.scm")((*repl* 'run))
+./cs-s7 ./cs-s7 repl.scm  -e "((*repl* (quote run)))"
+loading libc_s7.so
+<1> 
 ```
 
-The `cs-s7` command needs to be run from the s7 sources directory
+The `cs-s7` command in this case = needs to be run from the s7 sources directory
 so all the relevant files can be found. The REPL will then allow 
 multine strings etc as well as other facilities such as command
 completion. See the s7 manual for more information.
