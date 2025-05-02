@@ -57,7 +57,12 @@ int main(int argc, char **argv) {
     if (argc > 1) {
       int32_t i;
       for (int32_t i = 1; i < argc; i++) {
-        if(!strcmp(argv[i], "-e")) {
+        if(!strcmp(argv[i], "-q")) {
+          fprintf(stdout,"\n");
+          fflush(stdout);
+          exit(0);
+        }
+        else if(!strcmp(argv[i], "-e")) {
           if(argc > i+1){
             char *s;
             s7_pointer p = s7_eval_c_string(s7, argv[++i]);
