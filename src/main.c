@@ -46,7 +46,7 @@ static void bye() {
 }
 
 int main(int argc, char **argv) {
-
+  bool repl = true;
 #ifdef USE_TECLA
   GetLine *gl = new_GetLine(500, 5000);
   tp = gl;
@@ -57,11 +57,7 @@ int main(int argc, char **argv) {
     if (argc > 1) {
       int32_t i;
       for (int32_t i = 1; i < argc; i++) {
-        if(!strcmp(argv[i], "-q")) {
-          fprintf(stdout,"\n");
-          fflush(stdout);
-          exit(0);
-        }
+        if(!strcmp(argv[i], "-q")) repl = false;
         else if(!strcmp(argv[i], "-e")) {
           if(argc > i+1){
             char *s;
@@ -78,6 +74,11 @@ int main(int argc, char **argv) {
           }
         }
       }
+    }
+    if(!repl) {
+          fprintf(stdout,"\n");
+          fflush(stdout);
+          exit(0);
     }
     fprintf(stdout, "cs-s7: Csound s7 scheme interpreter");
     while (1) {

@@ -317,23 +317,14 @@ static void bye() {
 
 
 int main(int argc, char **argv){
+  bool repl = true;
   s7 = s7_init();
   if(cs_s7(s7) == CSOUND_SUCCESS) {
     atexit(bye);
-    init_nlibc(s7);
-    s7_define_function(s7, "set-sigint-handler", set_sigint_handler, 0, 0,
-                       false, "");
-    s7_define_function(s7, "unset-sigint-handler", unset_sigint_handler, 1, 0,
-                       false, "");
-    notcurses_s7_init(s7);
     if (argc > 1) {
       int32_t i;
       for (int32_t i = 1; i < argc; i++) {
-        if(!strcmp(argv[i], "-q")) {
-          fprintf(stdout,"\n");
-          fflush(stdout);
-          exit(0);
-        }
+        if(!strcmp(argv[i], "-q")) repl = false;
         else if(!strcmp(argv[i], "-e")) {
           if(argc > i+1) {
             char *s;
@@ -351,6 +342,17 @@ int main(int argc, char **argv){
         }
       }
     }
+    if(!repl) {
+      fprintf(stdout,"\n");
+      fflush(stdout);
+      exit(0);
+    }
+    init_nlibc(s7);
+    s7_define_function(s7, "set-sigint-handler", set_sigint_handler, 0, 0,
+                       false, "");
+    s7_define_function(s7, "unset-sigint-handler", unset_sigint_handler, 1, 0,
+                       false, "");
+    notcurses_s7_init(s7);
     fprintf(stdout, "cs-s7: Csound s7 scheme interpreter");
 #include "cs-s7-nrepl.h"
     s7_load_c_string(s7, (const char *) nrepl_scm, nrepl_scm_len);

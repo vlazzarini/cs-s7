@@ -24,8 +24,11 @@ make
 ```
 
 are used to build the `cs-s7` program and the `libcss7.{so,
-dylib,dll}`. 
-If libtecla is installed, the `cs-s7` REPL will use it for enhanced command editing.
+dylib,dll}`. The REPL is built by default with notcurses if
+installed (to turn this option off, pass `-DUSE_NOTCURSES=OFF`
+to CMake). Otherwise, lf libtecla is installed, the REPL will use it for enhanced
+command editing. The build falls back on the vanilla REPL with no
+special editing capabilities.
 
 ## Running
 
@@ -41,10 +44,12 @@ The command takes arguments in the form of files to be loaded
 or scheme expressions to be evaluated,
 
 ```
-cs-s7 [file.scm] [-e "scheme-expression"] 
+cs-s7 [file.scm] [-e "scheme-expression"] [-q]
 ```
 
-any number of arguments in these forms are accepted.
+any number of arguments in these forms are accepted. The `-q` flag
+makes the interpreter quit after running the command-line. Without it,
+the REPL is launched.
 
 ## Functions
 
@@ -201,10 +206,14 @@ program starts csound and then compiles code from a string,
 ```
 
 Unfortunately, due to line continuation, this code cannot be run in
-the `cs-s7` REPL in this form, as each command needs to terminate on a
-line end. However, s7 provides a handy REPL in repl.scm. With this
-and some other s7 files, we can run a more fully-featured REPL
-by loading the repl.scm in the command line and starting it
+the basic `cs-s7` REPL, as each command needs to terminate on a
+line end. However, if built using notcurses, there is 
+multiline support.
+
+Alternatively, s7 provides a handy scheme-based 
+REPL in repl.scm. With this and some other s7 files, we can run a 
+more fully-featured REPL by loading the repl.scm in the command 
+line and starting it
 
 ```
 ./cs-s7 ./cs-s7 repl.scm  -e "((*repl* (quote run)))"
@@ -212,7 +221,7 @@ loading libc_s7.so
 <1> 
 ```
 
-The `cs-s7` command in this case = needs to be run from the s7 sources directory
+The `cs-s7` command in this case needs to be run from the s7 sources directory
 so all the relevant files can be found. The REPL will then allow 
 multine strings etc as well as other facilities such as command
 completion. See the s7 manual for more information.
