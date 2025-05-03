@@ -358,7 +358,7 @@ static CS_VARIABLE* create_s7obj(void* cs, void* p, INSDS *ctx) {
       csound->Calloc(csound, sizeof(CS_VARIABLE));
     IGN(p);
     var->memBlockSize = CS_FLOAT_ALIGN(sizeof(S7OBJ));
-    var->initializeVariableMemory = &var_init_mem;
+    var->initializeVariableMemory = var_init_mem;
     var->ctx = ctx;
     return var;
 }
