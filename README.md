@@ -237,8 +237,8 @@ res:k = s7eval(code:S)
 ```
 
 evaluates a code string, returning the result (real or integer results
-only), at init and perf-times. Note that perf-time code executes at
-every k-cycle, so it may need to be protected with flow-control.
+only).  Perf-time code executes at every k-cycle , so it may need to be protected with flow-control.
+Also note that k-var opcodes do not execute at i-time.
 
 ```
 s7definevar(var:s, value:i)
@@ -247,7 +247,26 @@ s7definevar(var:s, value:k)
 
 defines a variable with a given value, similar comments apply here.
 
-Other opcodes will follow...
+The opcode module also defines a new type for s7 objects, `S7obj` (the
+convention is that new types should start with a capital letter). To
+manipulate this type we have
+
+```
+definevar("code", S7obj)
+obj:S7obj = s7real(value:i)
+obj:S7obj = s7real(value:k)
+value:i = s7real(S7obj)
+value:k = s7real(S7obj)
+obj:S7obj = s7eval(code:S)
+obj:S7obj = s7car(obj:S7obj)
+obj:S7obj = s7cdr(obj:S7obj)
+```
+
+I-time and k-rate opcodes execute at i- and perf-time respectively.
+S7obj opcodes run at both i-pass and every k-cycle. If for some
+reason, the obj is null, then the opcode does not call the
+respective s7 function and either the result is a null (in case of
+S7obj) or just 0 (if it is an i or k-var).
 
 ### Example
 
