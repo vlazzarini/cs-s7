@@ -304,7 +304,7 @@ we can use the value of a variable `x` defined in the interpreter,
 cs-s7> (define x 4)
 4
 cs-s7> (csound-event cs 0 2 0 0)
-#t
+(0 2 0 0)
 cs-s7> instr 2:	#i0 = 6.000
 ```
 
