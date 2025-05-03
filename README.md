@@ -252,7 +252,7 @@ convention is that new types should start with a capital letter). To
 manipulate this type we have
 
 ```
-definevar(var:S, obj:S7obj)
+s7definevar(var:S, obj:S7obj)
 obj:S7obj = s7real(value:i)
 obj:S7obj = s7real(value:k)
 value:i = s7real(obj:S7obj)
