@@ -474,13 +474,17 @@ int32_t append_opcodes(CSOUND *csound, s7_scheme *s7) {
   res += csound->AppendOpcode(csound, "s7eval", sizeof(OPCO), 0,
                              "k", "S", NULL, (SUBR) interp_call_myflt, NULL);
   res += csound->AppendOpcode(csound, "s7eval", sizeof(OPCO), 0,
-                             ":S7obj;", "S", (SUBR) interp_call, (SUBR) interp_call, NULL);
+                             ":S7obj;", "S", (SUBR) interp_call,
+                              (SUBR) interp_call, NULL);
   res += csound->AppendOpcode(csound, "s7definevar", sizeof(OPCI), 0,
-                            "", "S:S7obj;", (SUBR) define_var, (SUBR) define_var, NULL);
+                            "", "S:S7obj;", (SUBR) define_var,
+                              (SUBR) define_var, NULL);
   res += csound->AppendOpcode(csound, "s7car", sizeof(OPCIO), 0,
-                             ":S7obj;", ":S7obj;", (SUBR) car, (SUBR) car, NULL);
+                             ":S7obj;", ":S7obj;", (SUBR) car, (SUBR) car,
+                              NULL);
   res += csound->AppendOpcode(csound, "s7cdr", sizeof(OPCIO), 0,
-                             ":S7obj;", ":S7obj;", (SUBR) car, (SUBR) car, NULL);
+                             ":S7obj;", ":S7obj;", (SUBR) car, (SUBR) car,
+                              NULL);
   res += csound->AppendOpcode(csound, "s7real", sizeof(OPCIO), 0,
                              "i", ":S7obj;", (SUBR) real, NULL, NULL);
   res += csound->AppendOpcode(csound, "s7real", sizeof(OPCIO), 0,
