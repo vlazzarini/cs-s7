@@ -462,6 +462,20 @@ static int32_t make_real(CSOUND *csound, OPCIO *p) {
   return OK;
 }
 
+static int32_t save_to_global(CSOUND *csound, s7_scheme *s7) {
+  if(csound->QueryGlobalVariable(csound, "_S7_") == NULL) {
+    if(csound->CreateGlobalVariable(csound, "_S7_", sizeof(s7_scheme *))
+       == CSOUND_SUCCESS) {
+      s7_scheme **s7p = (s7_scheme **)
+        csound->QueryGlobalVariable(csound, "_S7_");
+      *s7p = s7;
+      return OK;
+    }
+    else return NOTOK;
+  }
+  return OK;
+}
+
 int32_t append_opcodes(CSOUND *csound, s7_scheme *s7) {
   int32_t res;
   add_s7obj(csound);
@@ -493,6 +507,8 @@ int32_t append_opcodes(CSOUND *csound, s7_scheme *s7) {
                              ":S7obj;", "i", (SUBR) make_real, NULL, NULL);
   res += csound->AppendOpcode(csound, "s7real", sizeof(OPCIO), 0,
                              ":S7obj;", "k", NULL, (SUBR) make_real, NULL);
+  if(s7 != NULL)
+    res += save_to_global(csound, s7);  
   return res;
 }
 
@@ -502,16 +518,11 @@ int32_t csoundModuleCreate(CSOUND *csound) {
 
 int32_t csoundModuleInit(CSOUND *csound) {
   if(csound->QueryGlobalVariable(csound, "_S7_") != NULL) return OK;
-  if(csound->CreateGlobalVariable(csound, "_S7_", sizeof(s7_scheme *))
-     == CSOUND_SUCCESS) {
-    if(csound->CreateGlobalVariable(csound, "_S7MOD_", 1) != CSOUND_SUCCESS)
+  if(csound->CreateGlobalVariable(csound, "_S7MOD_", 1) != CSOUND_SUCCESS)
       return NOTOK;
-    s7_scheme **s7p = (s7_scheme **) csound->QueryGlobalVariable(csound, "_S7_");
-    *s7p = s7_init();
-     return append_opcodes(csound, *s7p);
-  } 
-  csound->Message(csound, "could not allocate global var for s7 interpreter\n");
-  return OK;
+  if(save_to_global(csound, s7_init()))
+   return append_opcodes(csound, NULL);
+  else return NOTOK;
 }
 
 int32_t csoundModuleDestroy(CSOUND *csound)
@@ -522,7 +533,8 @@ int32_t csoundModuleDestroy(CSOUND *csound)
     if(s7 != NULL) s7_free(s7);
     csound->DestroyGlobalVariable(csound, "_S7_");
     csound->DestroyGlobalVariable(csound, "_S7MOD_");
-   } return OK;
+   }
+  return OK;
 }
 
 int32_t csoundModuleInfo(void)
