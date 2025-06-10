@@ -252,11 +252,11 @@ convention is that new types should start with a capital letter). To
 manipulate this type we have
 
 ```
-definevar("code", S7obj)
+s7definevar(var:S, obj:S7obj)
 obj:S7obj = s7real(value:i)
 obj:S7obj = s7real(value:k)
-value:i = s7real(S7obj)
-value:k = s7real(S7obj)
+value:i = s7real(obj:S7obj)
+value:k = s7real(obj:S7obj)
 obj:S7obj = s7eval(code:S)
 obj:S7obj = s7car(obj:S7obj)
 obj:S7obj = s7cdr(obj:S7obj)
@@ -304,7 +304,7 @@ we can use the value of a variable `x` defined in the interpreter,
 cs-s7> (define x 4)
 4
 cs-s7> (csound-event cs 0 2 0 0)
-#t
+(0 2 0 0)
 cs-s7> instr 2:	#i0 = 6.000
 ```
 
