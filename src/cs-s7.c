@@ -518,10 +518,12 @@ int32_t csoundModuleCreate(CSOUND *csound) {
 
 int32_t csoundModuleInit(CSOUND *csound) {
   if(csound->QueryGlobalVariable(csound, "_S7_") != NULL) return OK;
-  if(csound->CreateGlobalVariable(csound, "_S7MOD_", 1) != CSOUND_SUCCESS)
-      return NOTOK;
-  if(save_to_global(csound, s7_init()))
-   return append_opcodes(csound, NULL);
+  if(csound->CreateGlobalVariable(csound, "_S7MOD_", 1) != CSOUND_SUCCESS) {
+    return NOTOK;
+  }
+  if(save_to_global(csound, s7_init()) == CSOUND_SUCCESS){
+    return append_opcodes(csound, NULL);
+  }
   else return NOTOK;
 }
 
